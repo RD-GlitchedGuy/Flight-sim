@@ -52,6 +52,7 @@ label{font-size:13px}.note{font-size:12px;color:#9ab;margin:6px 0}
 #mpFeed .wpn{color:#ffb14a;font-weight:700;margin:0 6px}
 
 #tbtns{display:grid;grid-template-columns:repeat(2,70px)}
+.padf{outline:3px solid #ffd84a!important;outline-offset:2px;box-shadow:0 0 14px #ffd84a88}
 </style>
 </head>
 <body>
@@ -148,11 +149,11 @@ const ACTIONS=[['pitchUp','Nase hoch',1],['pitchDown','Nase runter',1],['rollLef
 const HOLD=new Set(ACTIONS.filter(a=>a[2]).map(a=>a[0]));
 const SHORT={gear:'GEAR',flaps:'FLAPS',brakes:'BRAKE',camera:'CAM',aircraft:'A/C',time:'+1h',restart:'RESET',approach:'APP',pause:'❚❚',pitchUp:'NOSE↑',pitchDown:'NOSE↓',rollLeft:'ROLL◀',rollRight:'ROLL▶',yawLeft:'YAW◀',yawRight:'YAW▶',throttleUp:'THR+',throttleDown:'THR−',trimUp:'TRIM↑',trimDown:'TRIM↓',sound:'SOUND',autoland:'AUTO',fire:'FIRE',missile:'FOX-2',flares:'FLARE',score:'SCORE',lobby:'LOBBY'};
 const DEF={kb:{pitchUp:'KeyS',pitchDown:'KeyW',rollLeft:'KeyA',rollRight:'KeyD',yawLeft:'KeyQ',yawRight:'KeyE',throttleUp:'ShiftLeft',throttleDown:'KeyX',brakes:'KeyB',trimUp:'KeyK',trimDown:'KeyI',flaps:'KeyF',gear:'KeyG',camera:'KeyC',aircraft:'KeyV',time:'KeyT',restart:'KeyN',sound:'KeyM',autoland:'ControlLeft',approach:'KeyL',pause:'KeyP',fire:'Space',missile:'KeyR',flares:'KeyH',score:'Tab',lobby:'KeyO'},
- pad:{pitchUp:-1,pitchDown:-1,rollLeft:-1,rollRight:-1,yawLeft:4,yawRight:5,throttleUp:7,throttleDown:6,brakes:1,trimUp:-1,trimDown:-1,flaps:2,gear:3,camera:0,aircraft:8,time:-1,restart:-1,sound:-1,autoland:-1,approach:-1,pause:-1,fire:-1,missile:-1,flares:-1,score:-1,lobby:-1},
+ pad:{pitchUp:-1,pitchDown:-1,rollLeft:-1,rollRight:-1,yawLeft:4,yawRight:5,throttleUp:7,throttleDown:6,brakes:10,trimUp:-1,trimDown:-1,flaps:12,gear:13,camera:3,aircraft:14,time:-1,restart:-1,sound:-1,autoland:15,approach:-1,pause:-1,fire:0,missile:1,flares:2,score:8,lobby:-1},padV:2,
  axes:{roll:0,pitch:1,yaw:2,thr:-1,inv:false,dz:0.12},touch:['gear','flaps','brakes','camera'],
  gfx:{bloom:true,blur:true,shadows:true,clouds:true,res:1,touchUI:'auto'},tspeed:2,wind:1,sound:true,vol:0.7};
 const KEY='skyflight_cfg_v1';
-function loadCfg(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s)return{...structuredClone(DEF),...s,kb:{...DEF.kb,...s.kb},pad:{...DEF.pad,...s.pad},axes:{...DEF.axes,...s.axes},gfx:{...DEF.gfx,...s.gfx},touch:(s.touch||DEF.touch).slice(0,4)};}catch(e){}return structuredClone(DEF);}
+function loadCfg(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s)return{...structuredClone(DEF),...s,kb:{...DEF.kb,...s.kb},pad:{...DEF.pad,...(s.padV===2?s.pad:{})},padV:2,axes:{...DEF.axes,...s.axes},gfx:{...DEF.gfx,...s.gfx},touch:(s.touch||DEF.touch).slice(0,4)};}catch(e){}return structuredClone(DEF);}
 function saveCfg(){try{localStorage.setItem(KEY,JSON.stringify(cfg));}catch(e){}}
 const MOBILE=/iPad|iPhone|Android/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 const PRESETS={
@@ -714,12 +715,29 @@ addEventListener('keydown',e=>{
  if(e.code.startsWith('Arrow')||e.code==='Space'||e.code==='Tab')e.preventDefault();
  kbDown.add(e.code);if(!e.repeat&&e.code==='ControlRight'&&cfg.kb.autoland==='ControlLeft')doAction('autoland');if(!e.repeat)for(const [a] of ACTIONS)if(!HOLD.has(a)&&cfg.kb[a]===e.code)doAction(a);});
 addEventListener('keyup',e=>kbDown.delete(e.code));addEventListener('blur',()=>kbDown.clear());
+let PAD=null,navIdx=0,navLast='',navT=0;
+function rumble(ms,s,w){try{PAD&&PAD.vibrationActuator&&PAD.vibrationActuator.playEffect('dual-rumble',{duration:ms,strongMagnitude:s,weakMagnitude:w});}catch(e){}}
+/* Menü/Lobby mit dem Controller bedienen: Steuerkreuz/Stick = Auswahl, A = OK, B = zurück, links/rechts = Auswahlliste ändern */
+function padNav(gp,pr){const root=mp.lobbyOpen?$('lobbyWrap'):$('menuWrap'),it=[...root.querySelectorAll('button,select,input')].filter(e=>e.offsetParent!==null);if(!it.length)return;
+ const ay=gp.axes[1]||0,ax=gp.axes[0]||0,d=pr[12]||ay<-0.6?'u':pr[13]||ay>0.6?'d':pr[14]||ax<-0.6?'l':pr[15]||ax>0.6?'r':'',now=performance.now();
+ navIdx=clamp(navIdx,0,it.length-1);let el=it[navIdx];
+ if(d&&(d!==navLast||now>navT)){navT=now+(d!==navLast?380:140);
+  if(el.tagName==='SELECT'&&(d==='l'||d==='r')){el.selectedIndex=clamp(el.selectedIndex+(d==='r'?1:-1),0,el.options.length-1);el.dispatchEvent(new Event('change',{bubbles:true}));}
+  else navIdx=clamp(navIdx+(d==='u'||d==='l'?-1:1),0,it.length-1);}
+ navLast=d;
+ const it2=[...root.querySelectorAll('button,select,input')].filter(e=>e.offsetParent!==null);navIdx=clamp(navIdx,0,it2.length-1);el=it2[navIdx];
+ root.querySelectorAll('.padf').forEach(e=>{if(e!==el)e.classList.remove('padf');});if(el&&!el.classList.contains('padf')){el.classList.add('padf');el.scrollIntoView({block:'nearest'});}
+ if(pr[0]&&!padPrev[0]&&el){if(el.tagName==='SELECT'){el.selectedIndex=(el.selectedIndex+1)%el.options.length;el.dispatchEvent(new Event('change',{bubbles:true}));}else if(el.tagName==='INPUT')el.focus();else el.click();}
+ if(pr[1]&&!padPrev[1]){if(document.activeElement&&document.activeElement.tagName==='INPUT')document.activeElement.blur();else if(mp.lobbyOpen)closeLobby();else toggleMenu(false);}}
 function pollPad(){padHeld={};padIn.pitch=padIn.roll=padIn.yaw=0;padIn.thr=null;
- const pads=navigator.getGamepads?navigator.getGamepads():[];let gp=null;for(const p of pads)if(p&&p.connected){gp=p;break;}
+ let pads=[];try{pads=navigator.getGamepads?[...navigator.getGamepads()]:[];}catch(e){}let gp=null;
+ for(const p of pads)if(p&&p.connected!==false&&p.buttons.length&&(!gp||(p.mapping==='standard')>(gp.mapping==='standard')||((p.mapping==='standard')===(gp.mapping==='standard')&&p.timestamp>gp.timestamp)))gp=p;
+ PAD=gp;
  if(!gp)return;if(gp.id!==padName){padName=gp.id;const pi=$('padinfo');if(pi)pi.textContent='Erkannt: '+padName;}
  const pr=gp.buttons.map(b=>b.pressed||b.value>0.4);
  if(listenPad){const b=pr.findIndex((v,i)=>v&&!padPrev[i]);if(b>=0){cfg.pad[listenPad]=b;saveCfg();listenPad=null;renderMenu();}padPrev=pr;return;}
- if(pr[9]&&!padPrev[9])toggleMenu();
+ if(pr[9]&&!padPrev[9]){if(mp.lobbyOpen)closeLobby();else toggleMenu();padPrev=pr;return;}
+ if(menuOpen&&!listenKey){padNav(gp,pr);padPrev=pr;return;}
  if(!menuOpen){const dz=cfg.axes.dz,ax=i=>{if(i<0||i>=gp.axes.length)return 0;const v=gp.axes[i];return Math.abs(v)<dz?0:Math.sign(v)*(Math.abs(v)-dz)/(1-dz);};
   padIn.roll=ax(cfg.axes.roll);padIn.pitch=ax(cfg.axes.pitch)*(cfg.axes.inv?-1:1);padIn.yaw=ax(cfg.axes.yaw);
   if(cfg.axes.thr>=0&&cfg.axes.thr<gp.axes.length)padIn.thr=(1-gp.axes[cfg.axes.thr])/2;
@@ -1139,7 +1157,7 @@ function frame(){requestAnimationFrame(frame);const dt=Math.min(clock.getDelta()
 /* ================= MULTIPLAYER (PeerJS): Lobbys · Bordkanone · IR-Raketen (Fox 2) · Flares · Kill-Feed ================= */
 const MPV='skyline-flight-v1-',MAXP=10,NOW=()=>performance.now()/1000;
 const GUN={v:1050,rate:16,life:2.2,dmg:6,ammo:800};
-const IR={ammo:4,range:3200,cone:13*DEG,gimbal:45*DEG,burn:2.6,acc:270,gmax:30,life:14,fuse:15,lockT:0.6,reload:25};
+const IR={ammo:4,range:4500,cone:13*DEG,gimbal:45*DEG,burn:2.6,acc:270,gmax:30,life:14,fuse:15,lockT:0.35,reload:25};
 const r1=x=>Math.round(x*10)/10,r4=x=>Math.round(x*1e4)/1e4;
 let mpName='';try{mpName=localStorage.getItem('skyflt_name')||'';}catch(e){}
 const mp={peer:null,conns:new Map(),host:false,hostConn:null,lobby:null,connected:false,retries:0,myId:Math.random().toString(36).slice(2,10),
@@ -1178,7 +1196,7 @@ function addHit(id,dmg,w,p){mp.hits.set(id,(mp.hits.get(id)||0)+dmg);mp.hitW=w;m
  if(SND.on)sBeep(w==='ir'?700:1900,0.03,0.07);}
 function flushHits(){for(const [id,d] of mp.hits)mpSend({t:'hit',to:id,from:mp.myId,dmg:d,w:mp.hitW});mp.hits.clear();}
 function mpOnHit(m){if(mp.dead||ac.crashed||mp.inv>0)return;const d=clamp(+m.dmg||0,0,200);mp.hp-=d;mp.lastHit={by:m.from,w:m.w,t:NOW()};
- mp.dmgFlash=Math.min(1,mp.dmgFlash+d/40);sBurst('bandpass',900,1,0.4,0.12);
+ mp.dmgFlash=Math.min(1,mp.dmgFlash+d/40);rumble(m.w==='ir'?600:120,m.w==='ir'?1:0.5,0.6);sBurst('bandpass',900,1,0.4,0.12);
  if(mp.hp<=0){mp.hp=0;mp.shot=true;ac.crashed='Abgeschossen von '+pname(m.from)+(m.w==='ir'?' (IR-Rakete)':' (Bordkanone)');crashFx();}}
 function mpOnKill(e){const K=esc(e.kn),V=esc(e.vn||'?');let h;
  if(e.w==='crash')h=`💥 <b>${V}</b> ist abgestürzt`;
@@ -1191,15 +1209,21 @@ function mpOnKill(e){const K=esc(e.kn),V=esc(e.vn||'?');let h;
  renderLobbyIfOpen();}
 
 /* ---------- Waffen ---------- */
-function seek(pos,fwd,cone){let best=null,bs=1e9;for(const r of mp.players.values()){if(r.dead||!r.model||r.iv)continue;_sf.copy(r.pos).sub(pos);const d=_sf.length();if(d<40)continue;
- const ang=_sf.angleTo(fwd);if(ang>cone)continue;_st.set(0,0,-1).applyQuaternion(r.q);const rear=Math.max(_sf.dot(_st)/d,0);   // von hinten = heißes Triebwerk
- const rng=IR.range*(r.ab?1.45:0.75+0.35*(r.th||0))*(0.55+0.45*rear);if(d>rng)continue;const sc=ang/cone+d/rng;if(sc<bs){bs=sc;best=r.id;}}return best;}
+/* Suchkreis in Bildschirm-Koordinaten (genau der gestrichelte Kreis im HUD) */
+function seekCircle(){const A=ac,f=_sf.set(0,0,-1).applyQuaternion(A.q),u=_st.set(0,1,0).applyQuaternion(A.q);
+ const c0=scr(_gc.copy(A.pos).addScaledVector(f,1000)),e=scr(_gd.copy(A.pos).addScaledVector(f,1000).addScaledVector(u,1000*Math.tan(IR.cone)));
+ return mp.seekC=c0&&e?[c0[0],c0[1],Math.max(30,Math.hypot(e[0]-c0[0],e[1]-c0[1]))]:null;}
+/* Ziel im Kreis = Lock. Ein bestehender Lock hält, solange das Ziel im 1,7-fachen Kreis bleibt */
+function seek(keep){const A=ac,C=seekCircle(),f=_sf.set(0,0,-1).applyQuaternion(A.q);let best=null,bs=1e9;
+ for(const r of mp.players.values()){if(r.dead||!r.model||r.iv)continue;_ga.copy(r.pos).sub(A.pos);const d=_ga.length();if(d<60||d>IR.range||_ga.dot(f)<=0)continue;
+  let k;if(C){const p=scr(r.pos);if(!p)continue;k=Math.hypot(p[0]-C[0],p[1]-C[1])/C[2];}else k=_ga.angleTo(f)/IR.cone;
+  if(k>(r.id===keep?1.7:1))continue;const sc=k+d/IR.range*0.3;if(sc<bs){bs=sc;best=r.id;}}return best;}
 const myMs=[];let msSeq=0;
 function fireMissile(){const A=ac;if(A.crashed||mp.dead)return;if(mp.ir<1){flash('Keine IR-Raketen – Nachladen läuft');return;}
  mp.ir--;mp.irT=0;const f=_me.set(0,0,-1).applyQuaternion(A.q).clone(),dn=_mb.set(0,-1,0).applyQuaternion(A.q);
- const tg=mp.lock&&mp.lockT>=IR.lockT?mp.lock:seek(A.pos,f,IR.cone*1.2);
+ const tg=mp.lock&&mp.lockT>=IR.lockT?mp.lock:seek(mp.lock);
  myMs.push({id:++msSeq,p:A.pos.clone().addScaledVector(dn,2.5),v:A.vel.clone().addScaledVector(f,20),t:0,tg,fl:NOW(),mesh:msMesh()});
- flash(tg?'FOX 2 → '+pname(tg):'FOX 2 – ohne Lock');sBurst('highpass',700,0.7,0.55,1.0);}
+ flash(tg?'FOX 2 → '+pname(tg):'FOX 2 – ohne Lock');rumble(250,0.4,0.3);sBurst('highpass',700,0.7,0.55,1.0);}
 function dropFlares(){const A=ac;if(A.crashed||mp.dead)return;if(mp.flares<=0){flash('Keine Flares mehr');return;}
  mp.flares--;mp.flareN++;mpFlareFx(A.pos,A.vel);sBurst('highpass',2500,0.8,0.3,0.25);}
 function updMyMissiles(dt,now){for(let i=myMs.length-1;i>=0;i--){const m=myMs[i];m.t+=dt;let sp=m.v.length();const d=_ga.copy(m.v).divideScalar(sp||1);
@@ -1317,10 +1341,10 @@ function mpUpdate(dt){const now=NOW(),A=ac;
  const fwd=_me.set(0,0,-1).applyQuaternion(A.q);
  const trig=alive&&!menuOpen&&held('fire')>0.3&&mp.gun>=1;mp.firing=trig;
  if(trig){mp.gunCD-=dt;while(mp.gunCD<=0&&mp.gun>=1){mp.gunCD+=1/GUN.rate;mp.gun--;_mb.set(0,-1,0).applyQuaternion(A.q);_ma.copy(A.pos).addScaledVector(fwd,mp.ownR*0.55).addScaledVector(_mb,0.6);
-  shoot(_ma,fwd,A.vel,true);if(mp.gun%2<1)sBurst('bandpass',160,1.2,0.35,0.07);}}
+  shoot(_ma,fwd,A.vel,true);if(mp.gun%4<1)rumble(50,0,0.35);if(mp.gun%2<1)sBurst('bandpass',160,1.2,0.35,0.07);}}
  else{mp.gunCD=Math.max(0,mp.gunCD);if(mp.gun<GUN.ammo)mp.gun=Math.min(GUN.ammo,mp.gun+dt*12);}
  // IR-Suchkopf mit Growl-Ton
- if(alive&&mp.ir>=1){const c=seek(A.pos,fwd,IR.cone);if(c&&c===mp.lock)mp.lockT+=dt;else{mp.lock=c;mp.lockT=0;}
+ if(alive&&mp.ir>=1){const c=seek(mp.lock);if(c&&c===mp.lock)mp.lockT+=dt;else{mp.lock=c;mp.lockT=0;}
   if(c&&!menuOpen&&(mp.toneT-=dt)<=0){const L=mp.lockT>=IR.lockT;mp.toneT=L?0.07:0.16;sBeep(L?980:440,L?0.05:0.09,0.05);}}
  else{mp.lock=null;mp.lockT=0;}
  // Geschosse
@@ -1372,7 +1396,8 @@ function mpDrawHUD(){const c=hctx,W=innerWidth,H=innerHeight,A=ac,alive=!A.crash
   if(gs){c.strokeStyle='#bfffd6';c.lineWidth=1.5;c.beginPath();c.moveTo(gs[0]-9,gs[1]);c.lineTo(gs[0]-3,gs[1]);c.moveTo(gs[0]+3,gs[1]);c.lineTo(gs[0]+9,gs[1]);c.moveTo(gs[0],gs[1]-9);c.lineTo(gs[0],gs[1]-3);c.moveTo(gs[0],gs[1]+3);c.lineTo(gs[0],gs[1]+9);c.stroke();
    if(mp.hitMark>0){c.strokeStyle=`rgba(255,255,255,${mp.hitMark*4})`;c.lineWidth=2.5;c.beginPath();for(const[a,b]of[[1,1],[1,-1],[-1,1],[-1,-1]]){c.moveTo(gs[0]+a*7,gs[1]+b*7);c.lineTo(gs[0]+a*15,gs[1]+b*15);}c.stroke();}
    if(mp.ir>=1){_mb.set(0,1,0).applyQuaternion(A.q);const e=scr(_mc.copy(A.pos).addScaledVector(fwd,1000).addScaledVector(_mb,1000*Math.tan(IR.cone))),s0=scr(_md.copy(A.pos).addScaledVector(fwd,1000));
-    if(e&&s0){c.setLineDash([6,6]);c.strokeStyle=mp.lock?'#ffd23a':'#ffffff55';c.lineWidth=1.5;c.beginPath();c.arc(s0[0],s0[1],Math.hypot(e[0]-s0[0],e[1]-s0[1]),0,7);c.stroke();c.setLineDash([]);}}}
+    if(e&&s0){const L=mp.lock&&mp.lockT>=IR.lockT;if(!L)c.setLineDash([6,6]);c.strokeStyle=L?'#ff2a2a':mp.lock?'#ffd23a':'#ffffff66';c.lineWidth=L?3:1.5;c.beginPath();c.arc(s0[0],s0[1],Math.max(30,Math.hypot(e[0]-s0[0],e[1]-s0[1])),0,7);c.stroke();c.setLineDash([]);
+    if(L){c.font='800 14px system-ui';c.fillStyle='#ff2a2a';c.strokeStyle='#000a';c.lineWidth=3;txtO(c,'LOCK – FEUER ('+keyName(cfg.kb.missile)+' / B)',s0[0],s0[1]+Math.max(30,Math.hypot(e[0]-s0[0],e[1]-s0[1]))+16);}}}}
   if(near&&nd<1800){const t=nd/GUN.v;_ma.copy(near.pos).addScaledVector(near.vel,t).addScaledVector(A.vel,-t);_ma.y+=0.5*9.81*t*t;const s=scr(_ma);
    if(s){c.strokeStyle='#ffe066';c.lineWidth=1.5;c.beginPath();c.arc(s[0],s[1],8,0,7);c.stroke();c.fillStyle='#ffe066';c.beginPath();c.arc(s[0],s[1],2,0,7);c.fill();}}}
  c.strokeStyle='#000c';c.lineWidth=4;
@@ -1416,7 +1441,7 @@ function renderLobby(){const el=$('lobbyWrap'),inL=!!mp.lobby,code=inL&&mp.lobby
   <div class="row" style="margin-top:10px"><input type="text" id="lbCode" maxlength="5" placeholder="CODE" style="text-transform:uppercase;width:120px"><button class="b big" data-lb="join">Beitreten</button></div></div>
  <div class="card"><div class="row"><button class="b" data-lb="solo">Einzelspieler / Freiflug</button></div></div>`}
  <div id="lbStatus">${esc(mp.status)}</div>
- <div class="card"><h2 style="margin-top:0">Kampf-Steuerung</h2><p class="note"><b>${keyName(cfg.kb.fire)}</b> Bordkanone (halten) · <b>${keyName(cfg.kb.missile)}</b> IR-Rakete „Fox 2“ – Gegner in den gestrichelten Suchkreis bringen, bis der Ton hoch wird und LOCK erscheint · <b>${keyName(cfg.kb.flares)}</b> Flares gegen anfliegende Raketen · <b>${keyName(cfg.kb.score)}</b> Rangliste · <b>${keyName(cfg.kb.lobby)}</b> Lobby. Wie in War Thunder sind IR-Raketen von hinten (heißes Triebwerk, Nachbrenner) viel wirksamer als frontal. Der gelbe Kreis zeigt den Vorhaltepunkt für die Kanone.</p></div>`;}
+ <div class="card"><h2 style="margin-top:0">Kampf-Steuerung</h2><p class="note"><b>${keyName(cfg.kb.fire)}</b> Bordkanone (halten) · <b>${keyName(cfg.kb.missile)}</b> IR-Rakete „Fox 2“ – Gegner in den gestrichelten Suchkreis bringen, bis der Ton hoch wird und LOCK erscheint · <b>${keyName(cfg.kb.flares)}</b> Flares gegen anfliegende Raketen · <b>${keyName(cfg.kb.score)}</b> Rangliste · <b>${keyName(cfg.kb.lobby)}</b> Lobby. Wie in War Thunder sind IR-Raketen von hinten (heißes Triebwerk, Nachbrenner) viel wirksamer als frontal. Der gelbe Kreis zeigt den Vorhaltepunkt für die Kanone.</p><p class="note"><b>🎮 Controller:</b> Linker Stick Nicken/Rollen · Rechter Stick Gieren · RT/LT Schub · <b>A</b> Kanone · <b>B</b> Rakete · <b>X</b> Flares · <b>Y</b> Kamera · <b>Back/Share</b> Rangliste · <b>Start</b> Menü · LB/RB Seitenruder · L3 Bremse · Steuerkreuz ↑ Klappen ↓ Fahrwerk ← Flugzeug → Landehilfe. Im Menü: Steuerkreuz wählen, A bestätigen, B zurück.${padName?' — Erkannt: '+esc(padName):''}</p></div>`;}
 $('lobby').addEventListener('click',e=>{const b=e.target.closest('[data-lb]');if(!b)return;const a=b.dataset.lb;
  if(a==='close')closeLobby();
  else if(a==='solo'){mpLeave();mpStatus('');closeLobby();}
