@@ -1828,8 +1828,8 @@ function updAdmMs(dt){const m=admMs;if(!m)return;const A=ac;m.t+=dt;
  msPose(m.mesh,m.p,m.v,m.t<8);msTrail(p0,m.p,m.t<8);
  if(!m.lost&&!A.crashed){const dd=m.p.distanceTo(A.pos);if(mp.warn===null||dd<mp.warn)mp.warn=dd;}}
 /* Rage-Sprüche beim Tod */
-const RAGE={shot:['Flieg nächstes Mal besser','Ausweichen ist auch eine Option.','Flares gibt\'s übrigens umsonst – benutz sie!','Skill Issue,'Die Rakete hat gepiept. Laut.','Tipp: Nicht geradeaus fliegen, wenn jemand hinter dir ist.','Das war kein Dogfight, das war Tontaubenschießen.','Dein Gegner bedankt sich für den Kill','Vielleicht lieber Papierflieger?','Mehr ausweichen, weniger beten.','Warst du AFK?','Nicht ragen. Respawnen.','Wer bremst, verliert. Wer geradeaus fliegt, auch.'],
- crash:['Der Boden war schon immer da.','„Pull up“ hieß nicht „weiter so“.','Schwerkraft: 1 – Du: 0','Terrain Warning ignoriert? Mutig.','Landen geht auch langsamer.','Der Berg hat gewonnen','Bodenkontakt: erfolgreich hergestellt.'],
+const RAGE={shot:['Flieg nächstes Mal besser 🙃','Ausweichen ist auch eine Option.','Flares gibt\'s übrigens umsonst – benutz sie!','Skill Issue ✈️💥','Die Rakete hat gepiept. Laut.','Tipp: Nicht geradeaus fliegen, wenn jemand hinter dir ist.','Das war kein Dogfight, das war Tontaubenschießen.','Dein Gegner bedankt sich für den Kill 🙏','Vielleicht lieber Papierflieger?','Mehr ausweichen, weniger beten.','Warst du AFK?','Nicht ragen. Respawnen.','Wer bremst, verliert. Wer geradeaus fliegt, auch.'],
+ crash:['Der Boden war schon immer da.','„Pull up“ hieß nicht „weiter so“.','Schwerkraft: 1 – Du: 0','Terrain Warning ignoriert? Mutig.','Landen geht auch langsamer.','Der Berg hat gewonnen ⛰️','Bodenkontakt: erfolgreich hergestellt.'],
  flak:['Von einem Panzer erwischt, der sich nicht mal bewegt…','Der Panzer steht seit Spielbeginn da. Nur so.','Flak 1 – Pilot 0'],
  ground:['In den Boden getrieben. Autsch.','Er hat dich nicht mal abgeschossen – du bist einfach reingeflogen.']};
 function rageMsg(w,lh){const L=w==='crash'?RAGE.crash:w==='ground'?RAGE.ground:lh&&lh.w==='flak'?RAGE.flak:RAGE.shot;return L[Math.random()*L.length|0];}
