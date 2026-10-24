@@ -160,34 +160,32 @@ body.heli #touch #tbtns button[data-act=weapon]{display:block}
 </style>
 </head>
 <body>
-<div id="skyIntro"><svg id="siSvg" viewBox="0 0 680 560" preserveAspectRatio="xMidYMid meet">
-<defs><g id="siP"><path d="M0,-110 C14,-110 16,-90 16,-70 L14,95 L0,115 L-14,95 L-16,-70 C-16,-90 -14,-110 0,-110Z"/><path d="M-15,-15 L-112,38 L-112,54 L-15,28Z M15,-15 L112,38 L112,54 L15,28Z"/><path d="M-12,82 L-50,106 L-50,116 L-12,102Z M12,82 L50,106 L50,116 L12,102Z"/></g></defs>
-<rect x="150" y="70" width="380" height="380" rx="70" fill="#000" stroke="#fff" stroke-width="16"/>
-<text x="340" y="516" text-anchor="middle" fill="#fff" style="font:600 32px system-ui,-apple-system,'Segoe UI',sans-serif;letter-spacing:1px">Sky Games</text>
-<g id="siPlane" transform="translate(800,700) rotate(-45) scale(0.95)"><g fill="#fff" stroke="#8A8A8A" stroke-width="7"><rect x="-62" y="-2" width="14" height="26" rx="7"/><rect x="-92" y="14" width="14" height="26" rx="7"/><rect x="48" y="-2" width="14" height="26" rx="7"/><rect x="78" y="14" width="14" height="26" rx="7"/></g><use href="#siP" fill="#fff" stroke="#8A8A8A" stroke-width="7" stroke-linejoin="round"/></g>
-<g id="siSun" transform="translate(264,184) scale(1)"><circle r="42" fill="#FFB000" stroke="#F59E00" stroke-width="6"/><g id="siRays" stroke="#F59E00" stroke-width="6" stroke-linecap="round"></g></g>
-</svg>
-<div id="siLoad"><svg width="30" height="30" viewBox="-17 -17 34 34"><circle r="14" fill="none" stroke="#5C3600" stroke-opacity=".2" stroke-width="4"/><path d="M0,-14 A14,14 0 0 1 14,0" fill="none" stroke="#5C3600" stroke-width="4" stroke-linecap="round"><animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="0.9s" repeatCount="indefinite"/></path></svg><span>Loading</span></div></div>
+<div id="skyIntro"><div id="siStage">
+<svg class="siBase" viewBox="0 0 680 560"><rect x="150" y="70" width="380" height="380" rx="70" fill="#000" stroke="#fff" stroke-width="16"/><text x="340" y="516" text-anchor="middle" fill="#fff" style="font:600 32px system-ui,-apple-system,'Segoe UI',sans-serif;letter-spacing:1px">Sky Games</text></svg>
+<div id="siPlane"><svg viewBox="-130 -130 260 260"><defs><g id="siP"><path d="M0,-110 C14,-110 16,-90 16,-70 L14,95 L0,115 L-14,95 L-16,-70 C-16,-90 -14,-110 0,-110Z"/><path d="M-15,-15 L-112,38 L-112,54 L-15,28Z M15,-15 L112,38 L112,54 L15,28Z"/><path d="M-12,82 L-50,106 L-50,116 L-12,102Z M12,82 L50,106 L50,116 L12,102Z"/></g></defs><g transform="rotate(-45) scale(0.95)"><g fill="#fff" stroke="#8A8A8A" stroke-width="7"><rect x="-62" y="-2" width="14" height="26" rx="7"/><rect x="-92" y="14" width="14" height="26" rx="7"/><rect x="48" y="-2" width="14" height="26" rx="7"/><rect x="78" y="14" width="14" height="26" rx="7"/></g><use href="#siP" fill="#fff" stroke="#8A8A8A" stroke-width="7" stroke-linejoin="round"/></g></svg></div>
+<div id="siSun"><svg viewBox="-80 -80 160 160"><circle r="42" fill="#FFB000" stroke="#F59E00" stroke-width="6"/><g stroke="#F59E00" stroke-width="6" stroke-linecap="round"><path id="siRays"/></g></svg></div>
+</div><div id="siLoad"><i></i><span>Loading</span></div></div>
 <style>
 #skyIntro{position:fixed;inset:0;z-index:1000;background:#000;overflow:hidden;transition:opacity .6s ease}
 #skyIntro.out{opacity:0;pointer-events:none}
-#siSvg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
-#siLoad{position:absolute;left:calc(22px + env(safe-area-inset-left,0px));bottom:calc(20px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:10px;opacity:0;color:#5C3600;font:600 18px system-ui,-apple-system,'Segoe UI',sans-serif}
+#siStage{position:absolute;left:50%;top:50%;width:min(100vw,calc(100vh * 680 / 560));aspect-ratio:680/560;transform:translate(-50%,-50%)}
+#siStage .siBase{position:absolute;inset:0;width:100%;height:100%}
+/* Sonne: 6-fach gross gezeichnet, per GPU von 1/6 auf 5 skaliert (laeuft auch fluessig, wenn der Browser gerade laedt) */
+#siSun{position:absolute;left:calc((264 - 480) / 680 * 100%);top:calc((184 - 480) / 560 * 100%);width:calc(960 / 680 * 100%);aspect-ratio:1;transform:scale(.1667);will-change:transform;animation:siGrow 2.6s cubic-bezier(.32,0,.67,0) 2.3s forwards}
+#siSun svg,#siPlane svg{display:block;width:100%;height:100%}
+#siPlane{position:absolute;left:calc((448 - 130) / 680 * 100%);top:calc((370 - 130) / 560 * 100%);width:calc(260 / 680 * 100%);aspect-ratio:1;will-change:transform;transform:translate(135.4%,126.9%);animation:siFly 1.8s cubic-bezier(.33,1,.68,1) .1s forwards}
+@keyframes siFly{to{transform:translate(0,0)}}
+@keyframes siGrow{to{transform:scale(5)}}
+#siLoad{position:absolute;left:calc(22px + env(safe-area-inset-left,0px));bottom:calc(20px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:10px;opacity:0;color:#5C3600;font:600 18px system-ui,-apple-system,'Segoe UI',sans-serif;animation:siFade .5s ease 4.9s forwards}
+#siLoad i{width:22px;height:22px;border-radius:50%;border:4px solid rgba(92,54,0,.2);border-top-color:#5C3600;animation:siSpin .9s linear infinite}
+@keyframes siSpin{to{transform:rotate(360deg)}}@keyframes siFade{to{opacity:1}}
 </style>
-<script>(function(){const ns='http://www.w3.org/2000/svg',$i=id=>document.getElementById(id),rays=$i('siRays');
-for(let k=0;k<16;k++){const a=k*Math.PI/8,m=k%2===0,r1=m?54:56,r2=m?76:68,l=document.createElementNS(ns,'line');
- l.setAttribute('x1',(Math.cos(a)*r1).toFixed(1));l.setAttribute('y1',(Math.sin(a)*r1).toFixed(1));l.setAttribute('x2',(Math.cos(a)*r2).toFixed(1));l.setAttribute('y2',(Math.sin(a)*r2).toFixed(1));rays.appendChild(l);}
-const ov=$i('skyIntro'),plane=$i('siPlane'),sun=$i('siSun'),load=$i('siLoad');
-const T_FLY=1800,T_PAUSE=500,T_GROW=2600,T_FADE=500,TOTAL=T_FLY+T_PAUSE+T_GROW,eo=t=>1-Math.pow(1-t,3),ei=t=>t*t*t;
-let lt=null,e=0,done=false,gone=false;
+<script>(function(){let d='';for(let k=0;k<16;k++){const a=k*Math.PI/8,m=k%2===0,r1=m?54:56,r2=m?76:68;d+=`M${(Math.cos(a)*r1).toFixed(1)},${(Math.sin(a)*r1).toFixed(1)}L${(Math.cos(a)*r2).toFixed(1)},${(Math.sin(a)*r2).toFixed(1)}`;}
+document.getElementById('siRays').setAttribute('d',d);
+const ov=document.getElementById('skyIntro');let done=false,gone=false;
 function finish(){if(gone)return;gone=true;ov.classList.add('out');setTimeout(()=>ov.remove(),700);}
 function tryEnd(){if(done&&window.__skyReady)finish();}
-function fr(now){if(gone)return;if(lt!==null)e+=Math.min(now-lt,200);lt=now;const p=eo(Math.min(e/T_FLY,1));
- plane.setAttribute('transform',`translate(${(800-352*p).toFixed(1)},${(700-330*p).toFixed(1)}) rotate(-45) scale(0.95)`);
- const g=Math.max(0,Math.min((e-T_FLY-T_PAUSE)/T_GROW,1));sun.setAttribute('transform',`translate(264,184) scale(${(1+29*ei(g)).toFixed(3)})`);
- load.style.opacity=Math.max(0,Math.min((e-TOTAL)/T_FADE,1)).toFixed(2);
- if(e>=TOTAL+1300&&!done){done=true;tryEnd();}requestAnimationFrame(fr);}
-requestAnimationFrame(fr);addEventListener('skyready',tryEnd);setTimeout(finish,45000);})();</script>
+setTimeout(()=>{done=true;tryEnd();},6200);addEventListener('skyready',tryEnd);setTimeout(finish,45000);})();</script>
 <canvas id="hud"></canvas><canvas id="mini"></canvas><div id="spd"><div class="l">IAS</div><div class="v" id="spdV">0</div><div class="u">kt</div><div class="s" id="spdS"></div><div class="bar"><i id="spdB"></i><b id="spdStall"></b></div></div>
 <button id="menuBtn" title="Menü (Esc)">☰</button>
 <div id="hint">Esc/☰ Menü · W/S Nicken · A/D Rollen · Q/E Gieren · Shift/X Schub · F Klappen · G Fahrwerk · B Bremse · K/I Trimmung · C Kamera · Maus ziehen: umschauen · Doppelklick: zentrieren · Strg Landehilfe · X+B (am Boden) Umkehrschub · M Ton · V Flugzeug · L Anflug · Leertaste Kanone · R IR-Rakete · H Flares · Tab Rangliste · O Lobby</div>
@@ -424,7 +422,32 @@ const PAPI_TH=[3.5,3.17,2.83,2.5];
 const clouds=(()=>{const p=[];for(let c=0;c<170;c++){const cx=(Math.random()-.5)*WORLD*1.1,cz=(Math.random()-.5)*WORLD*1.1,cy=1700+Math.random()*900,n=10+Math.random()*12|0;
  for(let i=0;i<n;i++)p.push(cx+(Math.random()-.5)*700,cy+(Math.random()-.5)*120,cz+(Math.random()-.5)*500);}
  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(p,3));
- const m=new THREE.Points(g,new THREE.PointsMaterial({map:cloudTex,size:650,transparent:true,opacity:0.85,depthWrite:false,color:0xffffff}));scene.add(m);return m;})();
+ const N=p.length/3,sz=new Float32Array(N);for(let i=0;i<N;i++)sz[i]=560+Math.random()*420;
+ const ig=new THREE.InstancedBufferGeometry();ig.setAttribute('position',new THREE.Float32BufferAttribute([-.5,-.5,0,.5,-.5,0,.5,.5,0,-.5,.5,0],3));ig.setAttribute('uv',new THREE.Float32BufferAttribute([0,0,1,0,1,1,0,1],2));ig.setIndex([0,1,2,0,2,3]);
+ ig.setAttribute('ofs',new THREE.InstancedBufferAttribute(new Float32Array(p),3));ig.setAttribute('sz',new THREE.InstancedBufferAttribute(sz,1));ig.instanceCount=N;
+ const U=THREE.UniformsUtils.merge([THREE.UniformsLib.fog,{map:{value:null},uColor:{value:new THREE.Color(1,1,1)},uOp:{value:0.6}}]);U.map.value=cloudTex;
+ const mat=new THREE.ShaderMaterial({uniforms:U,fog:true,transparent:true,depthWrite:false,
+  vertexShader:`attribute vec3 ofs;attribute float sz;varying vec2 vUv;varying float vA;
+#include <common>
+#include <fog_pars_vertex>
+#include <logdepthbuf_pars_vertex>
+void main(){vUv=uv;vec4 mvPosition=modelViewMatrix*vec4(ofs,1.0);float d=-mvPosition.z;mvPosition.xy+=position.xy*sz;
+ vA=smoothstep(300.0,1100.0,d);gl_Position=projectionMatrix*mvPosition;
+#include <logdepthbuf_vertex>
+#include <fog_vertex>
+}`,
+  fragmentShader:`uniform sampler2D map;uniform vec3 uColor;uniform float uOp;varying vec2 vUv;varying float vA;
+#include <common>
+#include <fog_pars_fragment>
+#include <logdepthbuf_pars_fragment>
+void main(){
+#include <logdepthbuf_fragment>
+vec4 t=texture2D(map,vUv);gl_FragColor=vec4(uColor*t.rgb,t.a*uOp*vA);if(gl_FragColor.a<0.004)discard;
+#include <tonemapping_fragment>
+#include <colorspace_fragment>
+#include <fog_fragment>
+}`});mat.color=U.uColor.value;
+ const m=new THREE.Mesh(ig,mat);m.frustumCulled=false;m.renderOrder=1;scene.add(m);return m;})();
 
 /* Partikelsystem: Kondensstreifen, Reifenrauch, Crash */
 const PMAX=4000,pPos=new Float32Array(PMAX*3),pDat=new Float32Array(PMAX*2),pCol=new Float32Array(PMAX*3),pVel=new Float32Array(PMAX*3),pLife=new Float32Array(PMAX),pMaxL=new Float32Array(PMAX),pS0=new Float32Array(PMAX),pGr=new Float32Array(PMAX),pA0=new Float32Array(PMAX);let pHead=0;
@@ -1262,7 +1285,7 @@ function setAircraft(k){if(ac.model){scene.remove(ac.model.group);ac.model.group
  acType=k;ac.P=TYPES[k];ac.model=TYPES[k].build();scene.add(ac.model.group);
  const sc=light.shadow.camera,r=ac.model.shadowR;sc.left=sc.bottom=-r;sc.right=sc.top=r;sc.updateProjectionMatrix();
  spawn(false);setCam(camMode);flash(ac.P.name);}
-function resize(){const w=innerWidth,h=innerHeight,pr=cine?Math.min(devicePixelRatio,MOBILE?1.75:2):Math.min(devicePixelRatio,MOBILE?1.25:1.5)*cfg.gfx.res*dynRes,dpr=Math.min(devicePixelRatio,POTATO?1:2);
+function resize(){const w=innerWidth,h=innerHeight,pr=Math.min(devicePixelRatio,MOBILE?1.25:1.5)*cfg.gfx.res*dynRes,dpr=Math.min(devicePixelRatio,POTATO?1:2);
  renderer.setPixelRatio(pr);renderer.setSize(w,h);composer.setPixelRatio(pr);composer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();
  hud.width=w*dpr;hud.height=h*dpr;hud.style.width=w+'px';hud.style.height=h+'px';hctx.setTransform(dpr,0,0,dpr,0,0);
  const ms=mini.clientWidth||180;mini.width=mini.height=ms*dpr;mctx.setTransform(dpr,0,0,dpr,0,0);}
@@ -1281,7 +1304,7 @@ function updModel(dt){const A=ac,m=A.model,P=A.P;m.group.position.copy(A.pos);m.
  if(m.prop){const sp=A.crashed?0:(8+A.thr*110);m.prop.rotation.z+=sp*dt;m.disc.visible=sp>30;m.prop.visible=sp<=30||camMode!==0;}
  for(const c of m.ab){c.visible=A.thr>0.03&&!A.crashed;const s=(A.ab?1:0.2+0.35*A.thr)*(0.9+Math.random()*0.2);c.scale.set(A.ab?1.1:0.8,A.ab?1.1:0.8,s);c.material.color.setRGB(A.ab?4:1.5,A.ab?1.8:0.9,A.ab?0.6:1.4);}}
 function frame(){requestAnimationFrame(frame);const dt=Math.min(clock.getDelta(),0.05);fpsS=lerp(fpsS,1/Math.max(dt,1e-3),0.05);
- dynT+=dt;if(dynT>2&&!cine){dynT=0;const o=dynRes;if(fpsS<55&&dynRes>0.5)dynRes=Math.max(0.5,dynRes-0.1);else if(fpsS>58.5&&dynRes<1)dynRes=Math.min(1,dynRes+0.05);if(o!==dynRes)resize();}
+ dynT+=dt;if(dynT>2){dynT=0;const o=dynRes;if(fpsS<55&&dynRes>0.5)dynRes=Math.max(0.5,dynRes-0.1);else if(fpsS>58.5&&dynRes<1)dynRes=Math.min(1,dynRes+0.05);if(o!==dynRes)resize();}
  pollPad();gatherInput(dt);if(!paused&&!menuOpen)updAP(dt);
  if(!paused&&!menuOpen){updWind(simTime);tod=(tod+dt*TSPEED[cfg.tspeed]/3600+24)%24;simTime+=dt;accum+=dt;let n=0;
   while(accum>=HSTEP&&n++<10){if(!ac.crashed)step(HSTEP);accum-=HSTEP;}
@@ -1897,7 +1920,7 @@ function cineStart(){const A=ac;let m;try{m=TYPES[ORDER.includes('f15')?'f15':OR
  cine={t:0,m,B,fw:fw.clone(),R,R2,dir,pos:B.clone().addScaledVector(fw,1500).addScaledVector(R,14).add(_cU.clone().multiplyScalar(32)),
   roll:0,camPos:B.clone().addScaledVector(fw,280).addScaledVector(R,-34).add(new THREE.Vector3(0,2.2,0)),look:null,fov:camera.fov,boom:false,au:null,end:false};
  cine.look=cine.pos.clone();
- menuOpen=true;document.body.classList.add('cine');cine.gfx={...cfg.gfx};Object.assign(cfg.gfx,{res:1,bloom:true,shadows:true,clouds:true,direct:false,waves:6});dynRes=1;applyGfx();
+ menuOpen=true;document.body.classList.add('cine');
  let ov=$('cineOv');if(!ov){ov=document.createElement('div');ov.id='cineOv';document.body.appendChild(ov);}
  ov.innerHTML='<i class="cb cbt"></i><i class="cb cbb"></i><div class="ct"><b>SKYLINE FLIGHT</b><span>DOGFIGHT</span></div><div class="cf"></div>';
  ov.style.display='block';ov.onpointerdown=e=>{e.preventDefault();e.stopPropagation();cineEnd();};
@@ -1940,7 +1963,7 @@ function cineTick(dt){const c=cine;if(!c)return;c.t+=dt;const t=c.t,m=c.m;
 const eo3=x=>1-Math.pow(1-x,3);
 function cineEnd(){const c=cine;if(!c||c.end)return;c.end=true;cine=null;scene.remove(c.m.group);
  if(c.au){try{const C=SND.ctx;c.au.out.gain.setTargetAtTime(0,C.currentTime,0.08);setTimeout(()=>{for(const k of ['roar','rum','whine'])try{c.au[k].s.stop();}catch(e){}c.au.out.disconnect();},400);}catch(e){}}
- camera.fov=c.fov;camera.updateProjectionMatrix();cfg.gfx=c.gfx;applyGfx();menuOpen=false;kbDown.clear();document.body.classList.remove('cine');
+ camera.fov=c.fov;camera.updateProjectionMatrix();menuOpen=false;kbDown.clear();document.body.classList.remove('cine');
  const ov=$('cineOv');if(ov){ov.classList.remove('on');ov.style.display='none';ov.innerHTML='';}}
 addEventListener('keydown',e=>{if(!cine)return;e.preventDefault();e.stopImmediatePropagation();if(e.code==='Escape'||e.code==='Space'||e.code==='Enter')cineEnd();},true);
 window.SKYMP={get cine(){return cine;},TANKS,mp,mpHandle,mpOnState,mpSend,ac,get acType(){return acType;}};
