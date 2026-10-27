@@ -2962,6 +2962,11 @@ function tankHUD(c,W,H){const A=ac,T=A.tank;if(!T)return;const s=clamp(Math.min(
 
 window.SKYMP={collTick,V3:THREE.Vector3,setTod:v=>{tod=v;},wreck,get fxt(){return FXT;},applyTheme,autoTheme,setSeason,BOTS,botTick,get season(){return mp.season;},get orbit(){return orbit;},setCam,sim:(n,pi)=>{if(pi!=null)input.pitch=pi;for(let i=0;i<n;i++){if(pi!=null)input.pitch=pi;if(!ac.crashed)step(HSTEP);}return [ac.pos.y.toFixed(1),(ac.vel.length()*3.6).toFixed(0),ac.onGround,ac.crashed||"ok"].join(" ");},toggleBigMap,get SAFE(){return SAFE;},b2dbg:()=>({bombs:bombs.length,nk:NK.length,ammo:mp.nk,dead:TANKS.filter(t=>t.dead).length}),gunAssist,scene,camera,tankInfo:()=>({tank:ac.tank,pos:ac.pos,type:acType,cam:camera.position.toArray().map(v=>+v.toFixed(2)),near:camera.near,gh:groundH(ac.pos.x,ac.pos.z),cm:camMode}),megaBoom,get cine(){return cine;},gh:groundH,TANKS,mp,mpHandle,mpOnState,mpSend,ac,get acType(){return acType;}};
 
+/* ---------- Karten-Button (Touch) neben dem Menü-Button ---------- */
+(()=>{const b=document.createElement('button');b.id='mapBtn';b.title='Karte (M)';b.textContent='🗺';
+ b.style.cssText='position:fixed;top:calc(10px + var(--sat,0px));right:calc(62px + var(--sar,0px));z-index:15;width:44px;height:44px;border-radius:10px;border:1px solid #fff4;background:#0007;color:#fff;font-size:20px;cursor:pointer';
+ b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();toggleBigMap();});document.body.appendChild(b);})();
+
 let scrF=0;
 try{F15=await loadF15();}catch(e){console.error('F-15 konnte nicht geladen werden',e);}
 if(!F15)ORDER.splice(ORDER.indexOf('f15'),1);
