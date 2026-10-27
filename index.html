@@ -2964,8 +2964,8 @@ window.SKYMP={collTick,V3:THREE.Vector3,setTod:v=>{tod=v;},wreck,get fxt(){retur
 
 /* ---------- Karten-Button (Touch) neben dem Menü-Button ---------- */
 (()=>{const b=document.createElement('button');b.id='mapBtn';b.title='Karte (M)';b.textContent='🗺';
- b.style.cssText='position:fixed;top:calc(62px + var(--sat,0px));right:calc(10px + var(--sar,0px));z-index:15;width:44px;height:44px;border-radius:10px;border:1px solid #fff4;background:#0007;color:#fff;font-size:20px;cursor:pointer';
- b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();toggleBigMap();});document.body.appendChild(b);})();
+ b.style.cssText='position:fixed;top:calc(10px + var(--sat,0px));right:calc(62px + var(--sar,0px));z-index:15;width:44px;height:44px;border-radius:10px;border:1px solid #fff4;background:#0007;color:#fff;font-size:20px;cursor:pointer';
+ b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();toggleBigMap();});document.body.appendChild(b);const st=document.createElement('style');st.textContent='body #touch #tbtns{right:calc(114px + var(--sar))}';document.head.appendChild(st);})();
 
 let scrF=0;
 try{F15=await loadF15();}catch(e){console.error('F-15 konnte nicht geladen werden',e);}
